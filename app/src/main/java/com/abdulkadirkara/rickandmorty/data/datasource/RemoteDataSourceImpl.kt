@@ -1,5 +1,6 @@
 package com.abdulkadirkara.rickandmorty.data.datasource
 
+import android.util.Log
 import com.abdulkadirkara.rickandmorty.data.remote.NetworkResponse
 import com.abdulkadirkara.rickandmorty.data.remote.dto.CharacterResponse
 import com.abdulkadirkara.rickandmorty.data.remote.dto.CharactersResponse
@@ -16,19 +17,27 @@ class RemoteDataSourceImpl @Inject constructor(
     private val apiService: ApiService,
     @IoDispatcher private val ioDispatcher: CoroutineDispatcher
 ) : RemoteDataSource {
+
+    private val TAG = this::class.java.simpleName
+
     override suspend fun getAllCharacters(): NetworkResponse<CharactersResponse> = withContext(ioDispatcher){
         try {
             val response = apiService.getAllCharacters()
             if (response.results.isNotEmpty()) {
+                Log.e(TAG, "getAllCharacters liste boş değil")
                 NetworkResponse.Success(response)
             } else {
+                Log.e(TAG, "getAllCharacters liste boş")
                 NetworkResponse.Error(IllegalStateException("No characters found"))
             }
         } catch (e: HttpException) { // Retrofit'in HttpException sınıfı
+            Log.e(TAG, "getAllCharacters HttpException: ${e.localizedMessage}")
             NetworkResponse.Error(Exception("API Error: ${e.code()} - ${e.message()}"))
         } catch (e: IOException) { // Ağ bağlantısı hataları
+            Log.e(TAG, "getAllCharacters IOException: ${e.localizedMessage}")
             NetworkResponse.Error(Exception("Network Error: ${e.localizedMessage}"))
         } catch (e: Exception) {
+            Log.e(TAG, "getAllCharacters Exception: ${e.localizedMessage}")
             NetworkResponse.Error(e)
         }
     }
@@ -36,12 +45,16 @@ class RemoteDataSourceImpl @Inject constructor(
     override suspend fun getSingleCharacter(id: Int): NetworkResponse<CharacterResponse> = withContext(ioDispatcher) {
         return@withContext try {
             val response = apiService.getSingleCharacter(id)
+            Log.e(TAG, "getSingleCharacter başarılı")
             NetworkResponse.Success(response)
-        } catch (e: HttpException) { // Retrofit'in HttpException sınıfı
+        } catch (e: HttpException) {
+            Log.e(TAG, "getSingleCharacter HttpException: ${e.localizedMessage}")
             NetworkResponse.Error(Exception("API Error: ${e.code()} - ${e.message()}"))
-        } catch (e: IOException) { // Ağ bağlantısı hataları
+        } catch (e: IOException) {
+            Log.e(TAG, "getSingleCharacter IOException: ${e.localizedMessage}")
             NetworkResponse.Error(Exception("Network Error: ${e.localizedMessage}"))
         } catch (e: Exception) {
+            Log.e(TAG, "getSingleCharacter Exception: ${e.localizedMessage}")
             NetworkResponse.Error(e)
         }
     }
@@ -49,12 +62,16 @@ class RemoteDataSourceImpl @Inject constructor(
     override suspend fun getAllLocations(): NetworkResponse<LocationResponse> = withContext(ioDispatcher) {
         try {
             val response = apiService.getAllLocations()
+            Log.e(TAG, "getAllLocations başarılı")
             NetworkResponse.Success(response)
         } catch (e: HttpException) {
+            Log.e(TAG, "getAllLocations HttpException: ${e.localizedMessage}")
             NetworkResponse.Error(Exception("API Error: ${e.code()} - ${e.message()}"))
         } catch (e: IOException) {
+            Log.e(TAG, "getAllLocations IOException: ${e.localizedMessage}")
             NetworkResponse.Error(Exception("Network Error: ${e.localizedMessage}"))
         } catch (e: Exception) {
+            Log.e(TAG, "getAllLocations Exception: ${e.localizedMessage}")
             NetworkResponse.Error(Exception("Unkonwn Exception: ${e.localizedMessage}"))
         }
     }
