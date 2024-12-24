@@ -3,6 +3,9 @@ package com.abdulkadirkara.rickandmorty.data.repository
 import android.util.Log
 import com.abdulkadirkara.rickandmorty.data.datasource.RemoteDataSource
 import com.abdulkadirkara.rickandmorty.data.remote.NetworkResponse
+import com.abdulkadirkara.rickandmorty.data.remote.dto.CharacterResponse
+import com.abdulkadirkara.rickandmorty.data.remote.dto.CharactersResponse
+import com.abdulkadirkara.rickandmorty.data.remote.dto.LocationResponse
 import com.abdulkadirkara.rickandmorty.domain.mapper.Mapper.toCharacterDetail
 import com.abdulkadirkara.rickandmorty.domain.mapper.Mapper.toCharacterListItem
 import com.abdulkadirkara.rickandmorty.domain.mapper.Mapper.toLocationListItem
@@ -19,46 +22,33 @@ class RickAndMortyRepositoryImpl @Inject constructor(
 
     private val TAG = this::class.java.simpleName
 
-    override suspend fun getAllCharacters() : List<CharacterListItem> {
+    override suspend fun getAllCharacters() : NetworkResponse<CharactersResponse> {
         Log.e(TAG, "getAllCharacters çağrıldı")
-        return when (val response = remoteDataSource.getAllCharacters()) {
-            is NetworkResponse.Success -> {
-                Log.e(TAG, "getAllCharacters NetworkResponse.Succes")
-                response.result!!.results.map { it.toCharacterListItem() } // Mapper kullanımı
-            }
-            is NetworkResponse.Error -> {
-                Log.e(TAG, "getAllCharacters NetworkResponse.Error")
-                throw response.exception // Hata yönetimini burada yapabilirsiniz
-            }
+        try {
+            return remoteDataSource.getAllCharacters()
+        } catch (e : Exception){
+            Log.e(TAG,e.toString())
+            return NetworkResponse.Error(e)
         }
     }
 
-    override suspend fun getSingleCharacter(id: Int): CharacterDetail {
+    override suspend fun getSingleCharacter(id: Int): NetworkResponse<CharacterResponse> {
         Log.e(TAG, "getSingleCharacter çağrıldı")
-        val response = remoteDataSource.getSingleCharacter(id)
-        when (response) {
-            is NetworkResponse.Success -> {
-                Log.e(TAG, "getSingleCharacter Network.Succes")
-                return response.result!!.toCharacterDetail()
-            }
-            is NetworkResponse.Error -> {
-                Log.e(TAG, "getSingleCharacter NetworkResponse.Error")
-                throw response.exception
-            }
+        try {
+            return remoteDataSource.getSingleCharacter(id)
+        } catch (e: Exception){
+            Log.e(TAG,e.toString())
+            return NetworkResponse.Error(e)
         }
     }
 
-    override suspend fun getAllLocations(): List<LocationListItem> {
+    override suspend fun getAllLocations(): NetworkResponse<LocationResponse> {
         Log.e(TAG, "getAllLocations çağrıldı")
-        return when (val response = remoteDataSource.getAllLocations()) {
-            is NetworkResponse.Success -> {
-                Log.e(TAG, "getAllLocations NetworkResponse.Succes")
-                response.result!!.results.map { it.toLocationListItem() }
-            }
-            is NetworkResponse.Error -> {
-                Log.e(TAG, "getAllLocations NetworkResponse.Error")
-                throw response.exception
-            }
+        try {
+            return remoteDataSource.getAllLocations()
+        } catch (e: Exception){
+            Log.e(TAG,e.toString())
+            return NetworkResponse.Error(e)
         }
     }
 }
