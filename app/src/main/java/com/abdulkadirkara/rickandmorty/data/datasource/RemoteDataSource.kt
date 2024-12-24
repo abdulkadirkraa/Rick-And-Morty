@@ -1,0 +1,12 @@
+package com.abdulkadirkara.rickandmorty.data.datasource
+
+import com.abdulkadirkara.rickandmorty.data.remote.NetworkResponse
+import com.abdulkadirkara.rickandmorty.data.remote.dto.CharacterResponse
+import com.abdulkadirkara.rickandmorty.data.remote.dto.CharactersResponse
+import com.abdulkadirkara.rickandmorty.data.remote.dto.LocationResponse
+
+interface RemoteDataSource {
+    suspend fun getAllCharacters(): NetworkResponse<CharactersResponse>
+    suspend fun getSingleCharacter(id: Int): NetworkResponse<CharacterResponse>
+    suspend fun getAllLocations(): NetworkResponse<LocationResponse>
+}
