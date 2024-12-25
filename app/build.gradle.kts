@@ -71,10 +71,12 @@ dependencies {
 
     //Navigation
     implementation("androidx.navigation:navigation-compose:2.8.5")
+    implementation("androidx.hilt:hilt-navigation-compose:1.2.0")
     //Gson
     implementation ("com.google.code.gson:gson:2.11.0")
     //ViewModel
-    implementation("androidx.lifecycle:lifecycle-viewmodel:2.8.7")
+    //implementation("androidx.lifecycle:lifecycle-viewmodel:2.8.7")
+    implementation("androidx.lifecycle:lifecycle-viewmodel-compose:2.8.7")
     implementation("androidx.activity:activity-ktx:1.9.3")
     //LiveData
     implementation("androidx.compose.runtime:runtime-livedata:1.7.6")
