@@ -1,6 +1,12 @@
 package com.abdulkadirkara.rickandmorty.presentation.screens.screenhome
 
+import android.net.Uri
+import androidx.compose.material3.SearchBar
 import android.widget.Toast
+import androidx.compose.animation.AnimatedVisibilityScope
+import androidx.compose.animation.ExperimentalSharedTransitionApi
+import androidx.compose.animation.SharedTransitionScope
+import androidx.compose.animation.core.tween
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
@@ -21,7 +27,9 @@ import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Search
 import androidx.compose.material.icons.rounded.Close
+import androidx.compose.material.icons.rounded.History
 import androidx.compose.material.icons.rounded.Search
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Button
@@ -31,14 +39,13 @@ import androidx.compose.material3.CenterAlignedTopAppBar
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
-import androidx.compose.material3.IconButton
-import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.livedata.observeAsState
+import androidx.compose.runtime.mutableStateListOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
@@ -59,9 +66,12 @@ import com.abdulkadirkara.rickandmorty.domain.model.CharacterListItem
 import com.abdulkadirkara.rickandmorty.domain.model.LocationListItem
 import com.abdulkadirkara.rickandmorty.presentation.navigation.Screens
 
-@OptIn(ExperimentalMaterial3Api::class)
+@OptIn(ExperimentalMaterial3Api::class, ExperimentalSharedTransitionApi::class)
 @Composable
-fun ScreenHome(navController: NavController, viewModel: ScreenHomeViewModel){
+fun SharedTransitionScope.ScreenHome(
+    navController: NavController, viewModel: ScreenHomeViewModel,
+    animatedVisibilityScope: AnimatedVisibilityScope
+) {
     val homeCharactersUiState = viewModel.homeCharactersUiState.observeAsState()
     val homeLocationUiState = viewModel.homeLocationUiState.observeAsState()
 
@@ -83,35 +93,43 @@ fun ScreenHome(navController: NavController, viewModel: ScreenHomeViewModel){
                 .fillMaxSize()
                 .padding(top = paddingValues.calculateTopPadding(), start = 12.dp, end = 12.dp)
         ) {
-            when(homeLocationUiState.value){
+            when (homeLocationUiState.value) {
                 is HomeLocationUiState.Error -> {
-                    val errorMessage = (homeLocationUiState.value as HomeLocationUiState.Error).message
+                    val errorMessage =
+                        (homeLocationUiState.value as HomeLocationUiState.Error).message
                     ErrorComponent(errorMessage)
                 }
+
                 is HomeLocationUiState.Loading -> {
                     LoadingComponent()
                 }
+
                 is HomeLocationUiState.Success -> {
                     val data = (homeLocationUiState.value as HomeLocationUiState.Success).data
                     LocationsComponent(paddingValues, data)
                 }
+
                 else -> {}
             }
 
-            SearchBarExample()
+            SearchBar()
 
-            when(homeCharactersUiState.value){
+            when (homeCharactersUiState.value) {
                 is HomeCharactersUiState.Error -> {
-                    val errorMessage = (homeCharactersUiState.value as HomeCharactersUiState.Error).message
+                    val errorMessage =
+                        (homeCharactersUiState.value as HomeCharactersUiState.Error).message
                     ErrorComponent(errorMessage)
                 }
+
                 is HomeCharactersUiState.Loading -> {
                     LoadingComponent()
                 }
+
                 is HomeCharactersUiState.Success -> {
                     val data = (homeCharactersUiState.value as HomeCharactersUiState.Success).data
-                    CharactersComponent(paddingValues, data, navController)
+                    CharactersComponent(data, navController, animatedVisibilityScope)
                 }
+
                 else -> {}
             }
 
@@ -119,42 +137,71 @@ fun ScreenHome(navController: NavController, viewModel: ScreenHomeViewModel){
     }
 }
 
+@OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun SearchBarExample() {
-    // Arama durumu
-    var searchQuery by remember { mutableStateOf("") }
-    var isSearching by remember { mutableStateOf(false) }
-
-    OutlinedTextField(
-        value = searchQuery,
-        onValueChange = {
-            searchQuery = it
-            isSearching = it.isNotEmpty() // Eğer arama boş değilse arama durumu aktif olur
+fun SearchBar() {
+    var text by remember { mutableStateOf("") }
+    var active by remember { mutableStateOf(false) }
+    var items = remember { mutableStateListOf<String>() }
+    SearchBar(
+        query = text,
+        onQueryChange = {
+            text = it
         },
-        label = { Text("Search Character") },
-        modifier = Modifier
-            .fillMaxWidth()
-            .padding(4.dp),
+        onSearch = {
+            items.add(text)
+            active = false
+        },
+        active = active,
+        onActiveChange = {
+            active = it
+        },
+        placeholder = {
+            Text(text = "Search Character")
+        },
         leadingIcon = {
-            if (isSearching) {
-                IconButton(onClick = {
-                    searchQuery = "" // Arama sorgusunu temizle
-                    isSearching = false // Arama durumunu sıfırla
-                }) {
-                    Icon(
-                        Icons.Rounded.Close, // Close ikonu
-                        contentDescription = "Clear Search"
-                    )
-                }
-            } else {
+            Icon(
+                modifier = Modifier.clickable {
+                    text = ""
+                },
+                imageVector = Icons.Rounded.Search,
+                contentDescription = ""
+            )
+        },
+        trailingIcon = {
+            if (active) {
                 Icon(
-                    Icons.Rounded.Search, // Search ikonu
-                    contentDescription = "Search"
+                    modifier = Modifier.clickable {
+                        text = ""
+                        if (text.isNotEmpty()) {
+                        } else {
+                            active = false
+                        }
+                    },
+                    imageVector = Icons.Rounded.Close,
+                    contentDescription = ""
                 )
             }
         },
-        singleLine = true // Tek satırlık arama çubuğu
-    )
+        modifier = Modifier
+            .fillMaxWidth()
+            .padding(4.dp),
+    ) {
+        items.forEach {
+            Row(
+                modifier = Modifier
+                    .padding(12.dp),
+                verticalAlignment = Alignment.CenterVertically
+            ) {
+                Icon(
+                    imageVector = Icons.Rounded.History,
+                    contentDescription = "",
+                    modifier = Modifier.padding(end = 8.dp)
+                )
+                Text(text = it)
+            }
+        }
+    }
 }
 
 
@@ -198,12 +245,12 @@ fun ErrorComponent(errorMessage: String) {
 
 
 @Composable
-fun LoadingComponent(){
+fun LoadingComponent() {
     Box(
         modifier = Modifier
             .fillMaxSize(),
         contentAlignment = Alignment.Center
-    ){
+    ) {
         Column(
             horizontalAlignment = Alignment.CenterHorizontally,
             modifier = Modifier.fillMaxSize()
@@ -219,8 +266,14 @@ fun LoadingComponent(){
     }
 }
 
+
+@OptIn(ExperimentalSharedTransitionApi::class)
 @Composable
-fun CharactersComponent(paddingValues: PaddingValues, data: List<CharacterListItem>, navController: NavController){
+fun SharedTransitionScope.CharactersComponent(
+    data: List<CharacterListItem>,
+    navController: NavController,
+    animatedVisibilityScope: AnimatedVisibilityScope
+) {
     LazyVerticalGrid(
         columns = GridCells.Fixed(2),
         modifier = Modifier
@@ -228,37 +281,53 @@ fun CharactersComponent(paddingValues: PaddingValues, data: List<CharacterListIt
             .padding(4.dp),
     ) {
         items(data.size) { index ->
-            CharacterCard(character = data[index]) { characterId ->
-                navController.navigate(Screens.ScreenDetail.route+"/${characterId}")
+            CharacterCard(character = data[index], animatedVisibilityScope) { characterId, image, name ->
+                navController.navigate(
+                    Screens.ScreenDetail.route + "/${characterId}/${Uri.encode(image)}}/${Uri.encode(name)}"
+                )
             }
         }
     }
 }
 
+
+@OptIn(ExperimentalSharedTransitionApi::class)
 @Composable
-fun CharacterCard(character: CharacterListItem, onClick: (Int) -> Unit) {
+fun SharedTransitionScope.CharacterCard(
+    character: CharacterListItem,
+    animatedVisibilityScope: AnimatedVisibilityScope,
+    onClick: (Int, String, String) -> Unit
+) {
     Card(
         modifier = Modifier
             .padding(4.dp)
             .fillMaxWidth()
-            .clickable { onClick(character.id) },
+            .clickable { onClick(character.id, character.image, character.name) },
         shape = RoundedCornerShape(20.dp)
     ) {
-        Column (modifier = Modifier.fillMaxSize()) {
-            Card (
+        Column(modifier = Modifier.fillMaxSize()) {
+            Card(
                 modifier = Modifier
                     .padding(4.dp),
                 shape = RoundedCornerShape(16.dp)
             ) {
                 AsyncImage(
-                    modifier = Modifier.fillMaxWidth(),
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .sharedElement(
+                            state = rememberSharedContentState(key = "image/${character.image}"),
+                            animatedVisibilityScope = animatedVisibilityScope,
+                            boundsTransform = { _, _ ->
+                                tween(durationMillis = 1000)
+                            }
+                        ),
                     contentScale = ContentScale.FillBounds,
                     model = character.image,
                     contentDescription = null,
                 )
             }
 
-            Row (
+            Row(
                 modifier = Modifier
                     .fillMaxWidth()
                     .padding(4.dp),
@@ -273,16 +342,26 @@ fun CharacterCard(character: CharacterListItem, onClick: (Int) -> Unit) {
                         .weight(20f)
                         .padding(start = 8.dp)
                         .clip(CircleShape)
-                        .background(color = when(character.status){
-                            "Alive" -> Color.Green
-                            "Dead" -> Color.Red
-                            else -> Color.Gray
-                        })
+                        .background(
+                            color = when (character.status) {
+                                "Alive" -> Color.Green
+                                "Dead" -> Color.Red
+                                else -> Color.Gray
+                            }
+                        )
                 )
                 Text(
-                    modifier = Modifier.padding(4.dp)
+                    modifier = Modifier
+                        .padding(4.dp)
                         .fillMaxWidth()
-                        .weight(80f),
+                        .weight(80f)
+                        .sharedElement(
+                            state = rememberSharedContentState(key = "name/${character.name}"),
+                            animatedVisibilityScope = animatedVisibilityScope,
+                            boundsTransform = { _, _ ->
+                                tween(durationMillis = 1000)
+                            }
+                        ),
                     text = character.name,
                     fontSize = 16.sp,
                     fontWeight = FontWeight.Bold,
@@ -298,10 +377,12 @@ fun CharacterCard(character: CharacterListItem, onClick: (Int) -> Unit) {
 }
 
 @Composable
-fun LocationsComponent(paddingValues: PaddingValues, data: List<LocationListItem>){
+fun LocationsComponent(paddingValues: PaddingValues, data: List<LocationListItem>) {
     val context = LocalContext.current
-    LazyRow (
-        modifier = Modifier.fillMaxWidth().padding(4.dp)
+    LazyRow(
+        modifier = Modifier
+            .fillMaxWidth()
+            .padding(4.dp)
     ) {
         items(data.size) { index ->
             LocationCard(data[index]) { locationId ->
@@ -313,7 +394,7 @@ fun LocationsComponent(paddingValues: PaddingValues, data: List<LocationListItem
 }
 
 @Composable
-fun LocationCard(location: LocationListItem, onClick: (Int) -> Unit){
+fun LocationCard(location: LocationListItem, onClick: (Int) -> Unit) {
     Card(
         modifier = Modifier
             .wrapContentSize()
@@ -323,8 +404,8 @@ fun LocationCard(location: LocationListItem, onClick: (Int) -> Unit){
             contentColor = Color.Cyan
         ),
         shape = RoundedCornerShape(30f)
-    ){
-        Row (
+    ) {
+        Row(
             modifier = Modifier.padding(horizontal = 8.dp),
             horizontalArrangement = Arrangement.SpaceBetween,
             verticalAlignment = Alignment.CenterVertically,

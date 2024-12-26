@@ -96,4 +96,8 @@ dependencies {
     implementation("io.coil-kt.coil3:coil-network-okhttp:3.0.4")
     // collapsing Toolbar
     implementation ("me.onebone:toolbar-compose:2.3.2")
+    //Icons
+    implementation("androidx.compose.material:material-icons-extended:1.7.6")
+    //Animation
+    implementation(libs.androidx.compose.animation)
 }
