@@ -15,7 +15,8 @@ object Mapper {
         return CharacterListItem(
             id = id,
             name = name,
-            image = image
+            image = image,
+            status = status
         )
     }
 
