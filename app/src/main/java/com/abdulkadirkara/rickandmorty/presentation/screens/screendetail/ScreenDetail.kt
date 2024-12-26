@@ -4,11 +4,9 @@ import androidx.compose.animation.AnimatedVisibilityScope
 import androidx.compose.animation.ExperimentalSharedTransitionApi
 import androidx.compose.animation.SharedTransitionScope
 import androidx.compose.animation.core.tween
-import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
-import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
@@ -21,7 +19,6 @@ import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.OutlinedCard
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
@@ -90,7 +87,7 @@ fun SharedTransitionScope.CharacterDetailComponent(data: CharacterDetail, animat
                     .fillMaxWidth()
                     .height(200.dp)
                     .pin()
-                    .background(color = MaterialTheme.colorScheme.primary)
+                    //.background(color = MaterialTheme.colorScheme.primary)
             )
 
             // Resim
@@ -148,305 +145,123 @@ fun SharedTransitionScope.CharacterDetailComponent(data: CharacterDetail, animat
                 Column (
                     modifier = Modifier.fillMaxSize()
                 ) {
-                    //Divider ve Başlık
-                    Row (
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .wrapContentHeight()
-                            .padding(12.dp),
-                        verticalAlignment = Alignment.CenterVertically,
-                    ) {
-                        HorizontalDivider(
-                            thickness = 1.dp,
-                            color = Color.Gray,
-                            modifier = Modifier.weight(30f).fillMaxWidth()
+                    DynamicCard(
+                        title = "Properties",
+                        data = mapOf(
+                            "Gender" to data.gender,
+                            "Species" to data.species,
+                            "Status" to data.status,
+                            "Created At" to data.createdAt
                         )
-                        Text(
-                            text = "Properties",
-                            fontSize = 16.sp,
-                            fontWeight = FontWeight.Bold,
-                            color = Color.Gray,
-                            textAlign = TextAlign.Center,
-                            modifier = Modifier.padding(horizontal = 4.dp).weight(30f).fillMaxWidth()
+                    )
+                    DynamicCard(
+                        title = "Where About",
+                        data = mapOf(
+                            "Origin" to data.originName,
+                            "Location" to data.locationName
                         )
-                        HorizontalDivider(
-                            thickness = 1.dp,
-                            color = Color.Gray,
-                            modifier = Modifier.weight(30f).fillMaxWidth()
-                        )
-                    }
-
-                    Row(
-                        modifier = Modifier.fillMaxWidth().padding(12.dp),
-                        verticalAlignment = Alignment.CenterVertically
-                    ) {
-                        Card (
-                            modifier = Modifier.weight(40f).padding(4.dp),
-                            shape = RoundedCornerShape(10.dp),
-                            colors = CardDefaults.cardColors(
-                                containerColor = Color.Gray,
-                                contentColor = Color.White
-                            )
-                        ) {
-                            Text(
-                                text = "Gender",
-                                fontSize = 16.sp,
-                                fontWeight = FontWeight.Bold,
-                                textAlign = TextAlign.Center,
-                                modifier = Modifier.fillMaxWidth().padding(4.dp)
-                            )
-                        }
-
-                        Card (
-                            modifier = Modifier.weight(60f).padding(4.dp),
-                            shape = RoundedCornerShape(10.dp),
-                            colors = CardDefaults.cardColors(
-                                containerColor = Color.LightGray,
-                                contentColor = Color.Black
-                            )
-                        ) {
-                            Text(
-                                text = data.gender,
-                                fontSize = 14.sp,
-                                textAlign = TextAlign.Center,
-                                modifier = Modifier.fillMaxWidth().padding(4.dp)
-                            )
-                        }
-                    }
-
-                    Row(
-                        modifier = Modifier.fillMaxWidth().padding(12.dp),
-                        verticalAlignment = Alignment.CenterVertically
-                    ) {
-                        Card (
-                            modifier = Modifier.weight(40f).padding(4.dp),
-                            shape = RoundedCornerShape(10.dp),
-                            colors = CardDefaults.cardColors(
-                                containerColor = Color.Gray,
-                                contentColor = Color.White
-                            )
-                        ) {
-                            Text(
-                                text = "Species",
-                                fontSize = 16.sp,
-                                fontWeight = FontWeight.Bold,
-                                textAlign = TextAlign.Center,
-                                modifier = Modifier.fillMaxWidth().padding(4.dp)
-                            )
-                        }
-
-                        Card (
-                            modifier = Modifier.weight(60f).padding(4.dp),
-                            shape = RoundedCornerShape(10.dp),
-                            colors = CardDefaults.cardColors(
-                                containerColor = Color.LightGray,
-                                contentColor = Color.Black
-                            )
-                        ) {
-                            Text(
-                                text = data.species,
-                                fontSize = 14.sp,
-                                textAlign = TextAlign.Center,
-                                modifier = Modifier.fillMaxWidth().padding(4.dp)
-                            )
-                        }
-                    }
-
-                    Row(
-                        modifier = Modifier.fillMaxWidth().padding(12.dp),
-                        verticalAlignment = Alignment.CenterVertically
-                    ) {
-                        OutlinedCard (
-                            modifier = Modifier.weight(40f).padding(4.dp),
-                            shape = RoundedCornerShape(10.dp),
-                            colors = CardDefaults.cardColors(
-                                containerColor = Color.Gray,
-                                contentColor = Color.White
-                            )
-                        ) {
-                            Text(
-                                text = "Status",
-                                fontSize = 16.sp,
-                                fontWeight = FontWeight.Bold,
-                                textAlign = TextAlign.Center,
-                                modifier = Modifier.fillMaxWidth().padding(4.dp)
-                            )
-                        }
-
-                        Card (
-                            modifier = Modifier.weight(60f).padding(4.dp),
-                            shape = RoundedCornerShape(10.dp),
-                            colors = CardDefaults.cardColors(
-                                containerColor = when(data.status){
-                                    "Alive" -> Color.Green
-                                    "Dead" -> Color.Red
-                                    else -> Color.LightGray
-                                },
-                                contentColor = Color.Black
-                            )
-                        ) {
-                            Text(
-                                text = data.status,
-                                fontSize = 14.sp,
-                                textAlign = TextAlign.Center,
-                                modifier = Modifier.fillMaxWidth().padding(4.dp)
-                            )
-                        }
-                    }
-
-                    Row(
-                        modifier = Modifier.fillMaxWidth().padding(12.dp),
-                        verticalAlignment = Alignment.CenterVertically
-                    ) {
-                        Card (
-                            modifier = Modifier.weight(40f).padding(4.dp),
-                            shape = RoundedCornerShape(10.dp),
-                            colors = CardDefaults.cardColors(
-                                containerColor = Color.Gray,
-                                contentColor = Color.White
-                            )
-                        ) {
-                            Text(
-                                text = "Created At",
-                                fontSize = 16.sp,
-                                fontWeight = FontWeight.Bold,
-                                textAlign = TextAlign.Center,
-                                modifier = Modifier.fillMaxWidth().padding(4.dp)
-                            )
-                        }
-
-                        Card (
-                            modifier = Modifier.weight(60f).padding(4.dp),
-                            shape = RoundedCornerShape(10.dp),
-                            colors = CardDefaults.cardColors(
-                                containerColor = Color.LightGray,
-                                contentColor = Color.Black
-                            )
-                        ) {
-                            Text(
-                                text = data.createdAt,
-                                fontSize = 14.sp,
-                                textAlign = TextAlign.Center,
-                                modifier = Modifier.fillMaxWidth().padding(4.dp)
-                            )
-                        }
-                    }
+                    )
                 }
             }
+        }
+    }
+}
 
-            Spacer(modifier = Modifier.height(12.dp))
+@Composable
+fun DividerAndTitleComponent(title : String){
+    Row (
+        modifier = Modifier
+            .fillMaxWidth()
+            .wrapContentHeight()
+            .padding(12.dp),
+        verticalAlignment = Alignment.CenterVertically,
+    ) {
+        HorizontalDivider(
+            thickness = 1.dp,
+            color = Color.Gray,
+            modifier = Modifier.weight(30f).fillMaxWidth()
+        )
+        Text(
+            text = title,
+            fontSize = 16.sp,
+            fontWeight = FontWeight.Bold,
+            color = Color.Gray,
+            textAlign = TextAlign.Center,
+            modifier = Modifier.padding(horizontal = 4.dp).weight(30f).fillMaxWidth()
+        )
+        HorizontalDivider(
+            thickness = 1.dp,
+            color = Color.Gray,
+            modifier = Modifier.weight(30f).fillMaxWidth()
+        )
+    }
+}
 
-            // Where About Card
-            Card(
-                modifier = Modifier
-                    .fillMaxWidth(),
-                shape = RoundedCornerShape(20.dp)
-            ) {
-                Column (
-                    modifier = Modifier.fillMaxSize()
+@Composable
+fun DynamicCard(title: String, data: Map<String, String>) {
+    Card(
+        modifier = Modifier
+            .fillMaxWidth(),
+        shape = RoundedCornerShape(20.dp)
+    ) {
+        Column(
+            modifier = Modifier.fillMaxSize()
+        ) {
+            // Divider ve Başlık
+            DividerAndTitleComponent(title)
+
+            data.forEach { (key, value) ->
+                Row(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(12.dp),
+                    verticalAlignment = Alignment.CenterVertically
                 ) {
-                    //Divider ve Başlık
-                    Row (
+                    // Sol Taraf: Key
+                    Card(
                         modifier = Modifier
-                            .fillMaxWidth()
-                            .wrapContentHeight()
-                            .padding(12.dp),
-                        verticalAlignment = Alignment.CenterVertically,
-                    ) {
-                        HorizontalDivider(
-                            thickness = 1.dp,
-                            color = Color.Gray,
-                            modifier = Modifier.weight(30f).fillMaxWidth()
+                            .weight(40f)
+                            .padding(4.dp),
+                        shape = RoundedCornerShape(10.dp),
+                        colors = CardDefaults.cardColors(
+                            containerColor = Color.Gray,
+                            contentColor = Color.White
                         )
+                    ) {
                         Text(
-                            text = "Where About",
+                            text = key,
                             fontSize = 16.sp,
                             fontWeight = FontWeight.Bold,
-                            color = Color.Gray,
                             textAlign = TextAlign.Center,
-                            modifier = Modifier.padding(horizontal = 4.dp).weight(30f).fillMaxWidth()
-                        )
-                        HorizontalDivider(
-                            thickness = 1.dp,
-                            color = Color.Gray,
-                            modifier = Modifier.weight(30f).fillMaxWidth()
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .padding(4.dp)
                         )
                     }
 
-                    Row(
-                        modifier = Modifier.fillMaxWidth().padding(12.dp),
-                        verticalAlignment = Alignment.CenterVertically
+                    // Sağ Taraf: Value
+                    Card(
+                        modifier = Modifier
+                            .weight(60f)
+                            .padding(4.dp),
+                        shape = RoundedCornerShape(10.dp),
+                        colors = CardDefaults.cardColors(
+                            containerColor = when (value) {
+                                "Alive" -> Color.Green
+                                "Dead" -> Color.Red
+                                else -> Color.LightGray
+                            },
+                            contentColor = Color.Black
+                        )
                     ) {
-                        Card (
-                            modifier = Modifier.weight(40f).padding(4.dp),
-                            shape = RoundedCornerShape(10.dp),
-                            colors = CardDefaults.cardColors(
-                                containerColor = Color.Gray,
-                                contentColor = Color.White
-                            )
-                        ) {
-                            Text(
-                                text = "Origin",
-                                fontSize = 16.sp,
-                                fontWeight = FontWeight.Bold,
-                                textAlign = TextAlign.Center,
-                                modifier = Modifier.fillMaxWidth().padding(4.dp)
-                            )
-                        }
-
-                        Card (
-                            modifier = Modifier.weight(60f).padding(4.dp),
-                            shape = RoundedCornerShape(10.dp),
-                            colors = CardDefaults.cardColors(
-                                containerColor = Color.LightGray,
-                                contentColor = Color.Black
-                            )
-                        ) {
-                            Text(
-                                text = data.originName,
-                                fontSize = 14.sp,
-                                textAlign = TextAlign.Center,
-                                modifier = Modifier.fillMaxWidth().padding(4.dp)
-                            )
-                        }
-                    }
-
-                    Row(
-                        modifier = Modifier.fillMaxWidth().padding(12.dp),
-                        verticalAlignment = Alignment.CenterVertically
-                    ) {
-                        Card (
-                            modifier = Modifier.weight(40f).padding(4.dp),
-                            shape = RoundedCornerShape(10.dp),
-                            colors = CardDefaults.cardColors(
-                                containerColor = Color.Gray,
-                                contentColor = Color.White
-                            )
-                        ) {
-                            Text(
-                                text = "Location",
-                                fontSize = 16.sp,
-                                fontWeight = FontWeight.Bold,
-                                textAlign = TextAlign.Center,
-                                modifier = Modifier.fillMaxWidth().padding(4.dp)
-                            )
-                        }
-
-                        Card (
-                            modifier = Modifier.weight(60f).padding(4.dp),
-                            shape = RoundedCornerShape(10.dp),
-                            colors = CardDefaults.cardColors(
-                                containerColor = Color.LightGray,
-                                contentColor = Color.Black
-                            )
-                        ) {
-                            Text(
-                                text = data.locationName,
-                                fontSize = 14.sp,
-                                textAlign = TextAlign.Center,
-                                modifier = Modifier.fillMaxWidth().padding(4.dp)
-                            )
-                        }
+                        Text(
+                            text = value,
+                            fontSize = 14.sp,
+                            textAlign = TextAlign.Center,
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .padding(4.dp)
+                        )
                     }
                 }
             }
