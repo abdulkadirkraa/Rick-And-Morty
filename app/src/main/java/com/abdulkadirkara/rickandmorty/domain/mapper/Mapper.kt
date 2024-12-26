@@ -3,7 +3,6 @@ package com.abdulkadirkara.rickandmorty.domain.mapper
 import com.abdulkadirkara.rickandmorty.data.remote.dto.CharacterResponse
 import com.abdulkadirkara.rickandmorty.domain.model.CharacterDetail
 import com.abdulkadirkara.rickandmorty.domain.model.CharacterListItem
-import com.abdulkadirkara.rickandmorty.domain.model.LocationDetail
 import com.abdulkadirkara.rickandmorty.domain.model.LocationListItem
 import com.abdulkadirkara.rickandmorty.data.remote.dto.Result
 import com.abdulkadirkara.rickandmorty.util.toUserFriendlyDate
@@ -41,18 +40,8 @@ object Mapper {
         return LocationListItem(
             id = id,
             name = name,
-            residentsCount = residents.size
-        )
-    }
-
-    // Detay ekranı için detaylı konum modeli dönüşümü
-    fun Result.toLocationDetail(): LocationDetail {
-        return LocationDetail(
-            id = id,
-            name = name,
-            dimension = dimension,
+            residentsCount = residents.size,
             residents = residents,
-            type = type,
         )
     }
 }

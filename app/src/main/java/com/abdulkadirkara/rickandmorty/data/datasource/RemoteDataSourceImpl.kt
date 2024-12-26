@@ -23,7 +23,8 @@ class RemoteDataSourceImpl @Inject constructor(
     override suspend fun getAllCharacters(): NetworkResponse<CharactersResponse> = withContext(ioDispatcher){
         try {
             val response = apiService.getAllCharacters()
-                NetworkResponse.Success(response)
+            Log.e(TAG, "getAllCharacters is success")
+            NetworkResponse.Success(response)
         } catch (e: HttpException) { // Retrofit'in HttpException sınıfı
             Log.e(TAG, "getAllCharacters HttpException: ${e.localizedMessage}")
             NetworkResponse.Error(Exception("API Error: ${e.code()} - ${e.message()}"))

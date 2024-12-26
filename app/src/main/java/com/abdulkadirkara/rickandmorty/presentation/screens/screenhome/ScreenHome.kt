@@ -1,8 +1,8 @@
 package com.abdulkadirkara.rickandmorty.presentation.screens.screenhome
 
 import android.net.Uri
+import android.util.Log
 import androidx.compose.material3.SearchBar
-import android.widget.Toast
 import androidx.compose.animation.AnimatedVisibilityScope
 import androidx.compose.animation.ExperimentalSharedTransitionApi
 import androidx.compose.animation.SharedTransitionScope
@@ -12,12 +12,9 @@ import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
-import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.wrapContentSize
@@ -27,16 +24,12 @@ import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.Search
 import androidx.compose.material.icons.rounded.Close
 import androidx.compose.material.icons.rounded.History
 import androidx.compose.material.icons.rounded.Search
-import androidx.compose.material3.AlertDialog
-import androidx.compose.material3.Button
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.CenterAlignedTopAppBar
-import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.Scaffold
@@ -54,7 +47,6 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
-import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow
@@ -65,6 +57,8 @@ import coil3.compose.AsyncImage
 import com.abdulkadirkara.rickandmorty.domain.model.CharacterListItem
 import com.abdulkadirkara.rickandmorty.domain.model.LocationListItem
 import com.abdulkadirkara.rickandmorty.presentation.navigation.Screens
+import com.abdulkadirkara.rickandmorty.presentation.screens.component.ErrorComponent
+import com.abdulkadirkara.rickandmorty.presentation.screens.component.LoadingComponent
 
 @OptIn(ExperimentalMaterial3Api::class, ExperimentalSharedTransitionApi::class)
 @Composable
@@ -75,7 +69,6 @@ fun SharedTransitionScope.ScreenHome(
     val homeCharactersUiState = viewModel.homeCharactersUiState.observeAsState()
     val homeLocationUiState = viewModel.homeLocationUiState.observeAsState()
 
-    //bunun yerine init dene
     LaunchedEffect(Unit) {
         viewModel.getAllCharacters()
         viewModel.getAllLocations()
@@ -95,44 +88,34 @@ fun SharedTransitionScope.ScreenHome(
         ) {
             when (homeLocationUiState.value) {
                 is HomeLocationUiState.Error -> {
-                    val errorMessage =
-                        (homeLocationUiState.value as HomeLocationUiState.Error).message
+                    val errorMessage = (homeLocationUiState.value as HomeLocationUiState.Error).message
                     ErrorComponent(errorMessage)
                 }
-
                 is HomeLocationUiState.Loading -> {
                     LoadingComponent()
                 }
-
                 is HomeLocationUiState.Success -> {
                     val data = (homeLocationUiState.value as HomeLocationUiState.Success).data
-                    LocationsComponent(paddingValues, data)
+                    LocationsComponent(data)
                 }
-
                 else -> {}
             }
-
             SearchBar()
-
             when (homeCharactersUiState.value) {
                 is HomeCharactersUiState.Error -> {
                     val errorMessage =
                         (homeCharactersUiState.value as HomeCharactersUiState.Error).message
                     ErrorComponent(errorMessage)
                 }
-
                 is HomeCharactersUiState.Loading -> {
                     LoadingComponent()
                 }
-
                 is HomeCharactersUiState.Success -> {
                     val data = (homeCharactersUiState.value as HomeCharactersUiState.Success).data
                     CharactersComponent(data, navController, animatedVisibilityScope)
                 }
-
                 else -> {}
             }
-
         }
     }
 }
@@ -142,7 +125,7 @@ fun SharedTransitionScope.ScreenHome(
 fun SearchBar() {
     var text by remember { mutableStateOf("") }
     var active by remember { mutableStateOf(false) }
-    var items = remember { mutableStateListOf<String>() }
+    val items = remember { mutableStateListOf<String>() }
     SearchBar(
         query = text,
         onQueryChange = {
@@ -172,8 +155,8 @@ fun SearchBar() {
             if (active) {
                 Icon(
                     modifier = Modifier.clickable {
-                        text = ""
-                        if (text.isNotEmpty()) {
+                        if(text.isNotEmpty()) {
+                            text = ""
                         } else {
                             active = false
                         }
@@ -204,69 +187,6 @@ fun SearchBar() {
     }
 }
 
-
-@Composable
-fun ErrorComponent(errorMessage: String) {
-    val context = LocalContext.current
-    Box(
-        modifier = Modifier
-            .fillMaxSize(),
-        contentAlignment = Alignment.Center
-    ) {
-        AlertDialog(
-            onDismissRequest = { /* Do nothing */ },
-            title = {
-                Text(text = "Hata", fontSize = 20.sp, color = Color.Red)
-            },
-            text = {
-                Text(text = errorMessage, fontSize = 16.sp, color = Color.Gray)
-            },
-            confirmButton = {
-                Button(onClick = {
-                    // Uygulamayı kapatma işlemi
-                    (context as? android.app.Activity)?.finish()
-                }) {
-                    Text(text = "Uygulamadan Çık")
-                }
-            },
-//            dismissButton = {
-//                Button(onClick = {
-//                    // İsteğe bağlı: Dialog'ı kapatabilir veya başka bir işlem yapabilirsiniz
-//                }) {
-//                    Text(text = "Tamam")
-//                }
-//            },
-            modifier = Modifier
-                .background(Color.White, RoundedCornerShape(12.dp))
-                .padding(8.dp)
-        )
-    }
-}
-
-
-@Composable
-fun LoadingComponent() {
-    Box(
-        modifier = Modifier
-            .fillMaxSize(),
-        contentAlignment = Alignment.Center
-    ) {
-        Column(
-            horizontalAlignment = Alignment.CenterHorizontally,
-            modifier = Modifier.fillMaxSize()
-        ) {
-            CircularProgressIndicator(
-                modifier = Modifier.size(60.dp),
-                color = Color.DarkGray,
-                strokeWidth = 5.dp
-            )
-            Spacer(modifier = Modifier.height(16.dp))
-            Text(text = "Yükleniyor...", fontSize = 18.sp, color = Color.Gray)
-        }
-    }
-}
-
-
 @OptIn(ExperimentalSharedTransitionApi::class)
 @Composable
 fun SharedTransitionScope.CharactersComponent(
@@ -290,7 +210,6 @@ fun SharedTransitionScope.CharactersComponent(
     }
 }
 
-
 @OptIn(ExperimentalSharedTransitionApi::class)
 @Composable
 fun SharedTransitionScope.CharacterCard(
@@ -307,8 +226,7 @@ fun SharedTransitionScope.CharacterCard(
     ) {
         Column(modifier = Modifier.fillMaxSize()) {
             Card(
-                modifier = Modifier
-                    .padding(4.dp),
+                modifier = Modifier.padding(4.dp),
                 shape = RoundedCornerShape(16.dp)
             ) {
                 AsyncImage(
@@ -334,7 +252,6 @@ fun SharedTransitionScope.CharacterCard(
                 horizontalArrangement = Arrangement.SpaceAround,
                 verticalAlignment = Alignment.CenterVertically
             ) {
-                var color by remember { mutableStateOf(Color.Red) }
 
                 Box(
                     modifier = Modifier
@@ -371,14 +288,12 @@ fun SharedTransitionScope.CharacterCard(
                     overflow = TextOverflow.Ellipsis
                 )
             }
-
         }
     }
 }
 
 @Composable
-fun LocationsComponent(paddingValues: PaddingValues, data: List<LocationListItem>) {
-    val context = LocalContext.current
+fun LocationsComponent(data: List<LocationListItem>) {
     LazyRow(
         modifier = Modifier
             .fillMaxWidth()
@@ -386,20 +301,23 @@ fun LocationsComponent(paddingValues: PaddingValues, data: List<LocationListItem
     ) {
         items(data.size) { index ->
             LocationCard(data[index]) { locationId ->
-                //Burda karakter listesini yenilemek gerekicek
-                Toast.makeText(context, "Location : $locationId", Toast.LENGTH_SHORT).show()
+                Log.e("location", getResidentIds(locationId).toString())
+                //burda residetens'leri alıp multiplecharahter fonk ile çağırmalıyız
+                //ama bir yandan da ana listeyi elde tutmalıyız
+                //kullanıcı tıklarsa arasın tıklamazsa bir item'a ana liste gözüksün
+                //ayrıca tıklananın görünüşü değişsin
             }
         }
     }
 }
 
 @Composable
-fun LocationCard(location: LocationListItem, onClick: (Int) -> Unit) {
+fun LocationCard(location: LocationListItem, onClick: (LocationListItem) -> Unit) {
     Card(
         modifier = Modifier
             .wrapContentSize()
             .padding(4.dp)
-            .clickable { onClick(location.id) },
+            .clickable { onClick(location) },
         colors = CardDefaults.cardColors(
             contentColor = Color.Cyan
         ),
@@ -433,4 +351,8 @@ fun LocationCard(location: LocationListItem, onClick: (Int) -> Unit) {
             }
         }
     }
+}
+
+fun getResidentIds(location: LocationListItem): List<String> {
+    return location.residents.map { it.split("/").last() }
 }

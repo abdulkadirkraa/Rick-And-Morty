@@ -5,8 +5,6 @@ import androidx.compose.animation.ExperimentalSharedTransitionApi
 import androidx.compose.animation.SharedTransitionScope
 import androidx.compose.animation.core.tween
 import androidx.compose.foundation.background
-import androidx.compose.foundation.gestures.scrollable
-import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
@@ -15,12 +13,7 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.wrapContentHeight
-import androidx.compose.foundation.lazy.LazyColumn
-import androidx.compose.foundation.lazy.items
-import androidx.compose.foundation.lazy.itemsIndexed
-import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
@@ -29,7 +22,6 @@ import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedCard
-import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
@@ -44,8 +36,8 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import coil3.compose.AsyncImage
 import com.abdulkadirkara.rickandmorty.domain.model.CharacterDetail
-import com.abdulkadirkara.rickandmorty.presentation.screens.screenhome.ErrorComponent
-import com.abdulkadirkara.rickandmorty.presentation.screens.screenhome.LoadingComponent
+import com.abdulkadirkara.rickandmorty.presentation.screens.component.ErrorComponent
+import com.abdulkadirkara.rickandmorty.presentation.screens.component.LoadingComponent
 import me.onebone.toolbar.CollapsingToolbarScaffold
 import me.onebone.toolbar.ScrollStrategy
 import me.onebone.toolbar.rememberCollapsingToolbarScaffoldState
@@ -53,11 +45,12 @@ import me.onebone.toolbar.rememberCollapsingToolbarScaffoldState
 
 @OptIn(ExperimentalSharedTransitionApi::class)
 @Composable
-fun SharedTransitionScope.ScreenDetail(id: Int,
-                                       image: String,
-                                       name: String,
-                                       viewModel: ScreenDetailViewModel,
-                                       animatedVisibilityScope: AnimatedVisibilityScope
+fun SharedTransitionScope.ScreenDetail(
+    id: Int,
+    image: String,
+    name: String,
+    viewModel: ScreenDetailViewModel,
+    animatedVisibilityScope: AnimatedVisibilityScope
 ) {
     val characterDetailUiState = viewModel.detailCharacterUiState.observeAsState()
 
