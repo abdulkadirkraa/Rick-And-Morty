@@ -14,6 +14,7 @@ import com.abdulkadirkara.rickandmorty.domain.usecase.GetAllLocationsUseCase
 import com.abdulkadirkara.rickandmorty.domain.usecase.GetMultipleCharacterUseCase
 import com.abdulkadirkara.rickandmorty.domain.usecase.GetSearchCharahctersUseCase
 import dagger.hilt.android.lifecycle.HiltViewModel
+import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.launchIn
 import kotlinx.coroutines.flow.onEach
 import kotlinx.coroutines.launch
@@ -33,6 +34,7 @@ class ScreenHomeViewModel @Inject constructor(
     var allCharacters : List<CharacterListItem>? = null
 
     var currentQuery: String? = null // Arama sorgusunu tutar
+    var queryList = mutableListOf<String>() // Arama sorgusunu tutar
     var searchBarActive = mutableStateOf(false) // SearchBar'ın açık/kapalı durumunu kontrol eder
 
     private val _homeLocationUiState = MutableLiveData<HomeLocationUiState>()
@@ -51,20 +53,26 @@ class ScreenHomeViewModel @Inject constructor(
     fun searchCharacter(name: String) {
         viewModelScope.launch {
             currentQuery = name
-            Log.e(TAG, "searchCharacter was called")
-            getSearchCharahctersUseCase.invoke(name).collect {
-                when(it){
-                    is NetworkResponse.Error -> {
-                        Log.e(TAG,"searchCharacter Error")
-                        _homeCharactersUiState.value = HomeCharactersUiState.Error("Network Error")
-                    }
-                    is NetworkResponse.Loading -> {
-                        Log.e(TAG,"searchCharacter Loading")
-                        _homeCharactersUiState.value = HomeCharactersUiState.Loading
-                    }
-                    is NetworkResponse.Success -> {
-                        Log.e(TAG,"searchCharacter Success")
-                        _homeCharactersUiState.value = HomeCharactersUiState.Success(it.result!!)
+            delay(300)
+            if (name == currentQuery){
+                Log.e(TAG, "searchCharacter was called")
+                getSearchCharahctersUseCase.invoke(name).collect {
+                    when(it){
+                        is NetworkResponse.Error -> {
+                            Log.e(TAG,"searchCharacter Error")
+                            _homeCharactersUiState.value = HomeCharactersUiState.Error("Network Error")
+                        }
+                        is NetworkResponse.Loading -> {
+                            Log.e(TAG,"searchCharacter Loading")
+                            _homeCharactersUiState.value = HomeCharactersUiState.Loading
+                        }
+                        is NetworkResponse.Success -> {
+                            if (it.result.isNullOrEmpty()) {
+                                _homeCharactersUiState.value = HomeCharactersUiState.Error("No results found")
+                            } else {
+                                _homeCharactersUiState.value = HomeCharactersUiState.Success(it.result)
+                            }
+                        }
                     }
                 }
             }

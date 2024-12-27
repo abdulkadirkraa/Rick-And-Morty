@@ -106,7 +106,8 @@ fun SharedTransitionScope.ScreenHome(
                 onQueryChange = { viewModel.searchCharacter(it) },
                 onClearQuery = { viewModel.clearSearch() },
                 isActive = viewModel.searchBarActive.value,
-                onActiveChange = { viewModel.searchBarActive.value = it }
+                onActiveChange = { viewModel.searchBarActive.value = it },
+                items = viewModel.queryList
             )
             when (homeCharactersUiState.value) {
                 is HomeCharactersUiState.Error -> {
@@ -134,10 +135,10 @@ fun SearchBar(
     onQueryChange: (String) -> Unit,
     onClearQuery: () -> Unit,
     isActive: Boolean,
-    onActiveChange: (Boolean) -> Unit
+    onActiveChange: (Boolean) -> Unit,
+    items: List<String> = remember { mutableStateListOf() }
 ) {
     var text by remember { mutableStateOf(query) }
-    val items = remember { mutableStateListOf<String>() }
 
     SearchBar(
         query = text,
