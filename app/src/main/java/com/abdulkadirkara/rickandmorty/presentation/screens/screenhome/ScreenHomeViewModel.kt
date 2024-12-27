@@ -1,22 +1,20 @@
 package com.abdulkadirkara.rickandmorty.presentation.screens.screenhome
 
-import android.util.Log
 import androidx.compose.runtime.mutableStateOf
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import com.abdulkadirkara.rickandmorty.data.remote.NetworkResponse
+import com.abdulkadirkara.rickandmorty.data.remote.onEmpty
+import com.abdulkadirkara.rickandmorty.data.remote.onError
+import com.abdulkadirkara.rickandmorty.data.remote.onLoading
+import com.abdulkadirkara.rickandmorty.data.remote.onSuccess
 import com.abdulkadirkara.rickandmorty.domain.model.CharacterListItem
-import com.abdulkadirkara.rickandmorty.domain.model.LocationListItem
 import com.abdulkadirkara.rickandmorty.domain.usecase.GetAllCharactersUseCase
 import com.abdulkadirkara.rickandmorty.domain.usecase.GetAllLocationsUseCase
-import com.abdulkadirkara.rickandmorty.domain.usecase.GetMultipleCharacterUseCase
 import com.abdulkadirkara.rickandmorty.domain.usecase.GetSearchCharahctersUseCase
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.delay
-import kotlinx.coroutines.flow.launchIn
-import kotlinx.coroutines.flow.onEach
 import kotlinx.coroutines.launch
 import javax.inject.Inject
 
@@ -24,14 +22,13 @@ import javax.inject.Inject
 class ScreenHomeViewModel @Inject constructor(
     private val getAllCharactersUseCase: GetAllCharactersUseCase,
     private val getAllLocationsUseCase: GetAllLocationsUseCase,
-    private val getMultipleCharacterUseCase: GetMultipleCharacterUseCase,
+    //private val getMultipleCharacterUseCase: GetMultipleCharacterUseCase,
     private val getSearchCharahctersUseCase: GetSearchCharahctersUseCase
 ) : ViewModel() {
-    private val TAG = this::class.java.simpleName
 
     private val _homeCharactersUiState = MutableLiveData<HomeCharactersUiState>()
     val homeCharactersUiState: LiveData<HomeCharactersUiState> = _homeCharactersUiState
-    var allCharacters : List<CharacterListItem>? = null
+    private var allCharacters : List<CharacterListItem>? = null
 
     var currentQuery: String? = null // Arama sorgusunu tutar
     var queryList = mutableListOf<String>() // Arama sorgusunu tutar
@@ -55,70 +52,52 @@ class ScreenHomeViewModel @Inject constructor(
             currentQuery = name
             delay(300)
             if (name == currentQuery){
-                Log.e(TAG, "searchCharacter was called")
-                getSearchCharahctersUseCase.invoke(name).collect {
-                    when(it){
-                        is NetworkResponse.Error -> {
-                            Log.e(TAG,"searchCharacter Error")
-                            _homeCharactersUiState.value = HomeCharactersUiState.Error("Network Error")
-                        }
-                        is NetworkResponse.Loading -> {
-                            Log.e(TAG,"searchCharacter Loading")
-                            _homeCharactersUiState.value = HomeCharactersUiState.Loading
-                        }
-                        is NetworkResponse.Success -> {
-                            if (it.result.isNullOrEmpty()) {
-                                _homeCharactersUiState.value = HomeCharactersUiState.Error("No results found")
-                            } else {
-                                _homeCharactersUiState.value = HomeCharactersUiState.Success(it.result)
-                            }
-                        }
-                    }
-                }
-            }
-        }
-    }
-
-    fun getAllCharacters() {
-        viewModelScope.launch {
-            Log.e(TAG, "getAllCharacters was called")
-            getAllCharactersUseCase.invoke().collect {
-                when (it) {
-                    is NetworkResponse.Error -> {
-                        Log.e(TAG,"getAllCharacters Error")
-                        _homeCharactersUiState.value = HomeCharactersUiState.Error("Network Error")
-                    }
-                    is NetworkResponse.Loading -> {
-                        Log.e(TAG,"getAllCharacters Loading")
+                getSearchCharahctersUseCase.invoke(name).collect { it->
+                    it.onLoading {
                         _homeCharactersUiState.value = HomeCharactersUiState.Loading
-                    }
-                    is NetworkResponse.Success -> {
-                        Log.e(TAG,"getAllCharacters Success")
-                        _homeCharactersUiState.value = HomeCharactersUiState.Success(it.result!!)
-                        allCharacters = it.result
+                    }.onEmpty {
+                        _homeCharactersUiState.value = HomeCharactersUiState.Empty
+                    }.onError {
+                        _homeCharactersUiState.value = HomeCharactersUiState.Error("Network Error")
+                    }.onSuccess {
+                        _homeCharactersUiState.value = HomeCharactersUiState.Success(it)
                     }
                 }
             }
         }
     }
 
-    fun getAllLocations() {
-        Log.e(TAG, "getAllLocations was called")
-        getAllLocationsUseCase.invoke().onEach {
-            when(it){
-                is NetworkResponse.Error -> {
-                    Log.e(TAG,"getAllLocations Error")
-                    _homeLocationUiState.value = HomeLocationUiState.Error("Network Error")
-                }
-                is NetworkResponse.Loading -> {
-                    Log.e(TAG,"getAllLocations Loading")
-                    _homeLocationUiState.value = HomeLocationUiState.Loading
-                }
-                is NetworkResponse.Success -> {
-                    Log.e(TAG,"getAllLocations Success")
-                    _homeLocationUiState.value = HomeLocationUiState.Success(it.result!!)
+    private fun getAllCharacters() {
+        viewModelScope.launch {
+            getAllCharactersUseCase.invoke().collect { it ->
+                it.onLoading {
+                    _homeCharactersUiState.value = HomeCharactersUiState.Loading
+                }.onEmpty {
+                    _homeCharactersUiState.value = HomeCharactersUiState.Empty
+                }.onError {
+                    _homeCharactersUiState.value = HomeCharactersUiState.Error("Network Error")
+                }.onSuccess {
+                    _homeCharactersUiState.value = HomeCharactersUiState.Success(it)
+                    allCharacters = it
                 }
             }
-        }.launchIn(viewModelScope)
+        }
+    }
+
+    private fun getAllLocations() {
+        viewModelScope.launch {
+            getAllLocationsUseCase.invoke().collect { it ->
+                it.onLoading {
+                    _homeLocationUiState.value = HomeLocationUiState.Loading
+                }.onEmpty {
+                    _homeLocationUiState.value = HomeLocationUiState.Empty
+                }.onError {
+                    _homeLocationUiState.value = HomeLocationUiState.Error("Network Error")
+                }.onSuccess {
+                    _homeLocationUiState.value = HomeLocationUiState.Success(it)
+                }
+
+            }
+        }
     }
 }

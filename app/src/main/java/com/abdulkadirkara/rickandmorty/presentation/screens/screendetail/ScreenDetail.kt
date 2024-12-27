@@ -67,6 +67,9 @@ fun SharedTransitionScope.ScreenDetail(
             val data = (characterDetailUiState.value as DetailCharacterUiState.Success).data
             CharacterDetailComponent(data, animatedVisibilityScope)
         }
+        is DetailCharacterUiState.Empty -> {
+            ErrorComponent("No results found")
+        }
         else -> {}
     }
 }

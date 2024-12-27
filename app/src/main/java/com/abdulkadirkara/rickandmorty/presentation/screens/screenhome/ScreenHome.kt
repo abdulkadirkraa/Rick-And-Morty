@@ -122,6 +122,9 @@ fun SharedTransitionScope.ScreenHome(
                     val data = (homeCharactersUiState.value as HomeCharactersUiState.Success).data
                     CharactersComponent(data, navController, animatedVisibilityScope)
                 }
+                is HomeCharactersUiState.Empty -> {
+                    ErrorComponent("No results found")
+                }
                 else -> {}
             }
         }

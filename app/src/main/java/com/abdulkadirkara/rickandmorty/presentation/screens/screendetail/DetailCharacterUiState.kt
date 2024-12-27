@@ -6,4 +6,5 @@ sealed class DetailCharacterUiState {
     data object Loading : DetailCharacterUiState()
     data class Success(val data: CharacterDetail) : DetailCharacterUiState()
     data class Error(val message: String) : DetailCharacterUiState()
+    data object Empty : DetailCharacterUiState()
 }
