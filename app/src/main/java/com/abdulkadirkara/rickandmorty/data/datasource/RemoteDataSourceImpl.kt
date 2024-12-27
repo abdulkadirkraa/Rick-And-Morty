@@ -6,7 +6,8 @@ import com.abdulkadirkara.rickandmorty.data.remote.dto.CharactersResponse
 import com.abdulkadirkara.rickandmorty.data.remote.dto.LocationResponse
 import com.abdulkadirkara.rickandmorty.data.remote.dto.Result
 import com.abdulkadirkara.rickandmorty.data.remote.service.ApiService
-import com.abdulkadirkara.rickandmorty.di.coroutines.IoDispatcher
+import com.abdulkadirkara.rickandmorty.di.coroutines.DispatcherType
+import com.abdulkadirkara.rickandmorty.di.coroutines.RickAndMortyDispatchers
 import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.withContext
 import retrofit2.HttpException
@@ -15,7 +16,7 @@ import javax.inject.Inject
 
 class RemoteDataSourceImpl @Inject constructor(
     private val apiService: ApiService,
-    @IoDispatcher private val ioDispatcher: CoroutineDispatcher
+    @RickAndMortyDispatchers(DispatcherType.Io) private val ioDispatcher: CoroutineDispatcher
 ) : RemoteDataSource {
 
     override suspend fun getAllCharacters(): NetworkResponse<CharactersResponse> = withContext(ioDispatcher){
