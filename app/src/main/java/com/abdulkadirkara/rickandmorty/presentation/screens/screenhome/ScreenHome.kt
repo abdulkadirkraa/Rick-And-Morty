@@ -35,6 +35,7 @@ import androidx.compose.material3.Icon
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.livedata.observeAsState
 import androidx.compose.runtime.mutableStateListOf
@@ -67,6 +68,12 @@ fun SharedTransitionScope.ScreenHome(
 ) {
     val homeCharactersUiState = viewModel.homeCharactersUiState.observeAsState()
     val homeLocationUiState = viewModel.homeLocationUiState.observeAsState()
+    val currentQuery = viewModel.currentQuery // ViewModel'deki mevcut sorgu
+
+    LaunchedEffect(Unit) {
+        viewModel.searchBarActive.value = false // SearchBar'ın aktifliğini kapatıyoruz
+    }
+
     Scaffold(
         topBar = {
             CenterAlignedTopAppBar(
@@ -94,7 +101,13 @@ fun SharedTransitionScope.ScreenHome(
                 }
                 else -> {}
             }
-            SearchBar(viewModel)
+            SearchBar(
+                query = currentQuery ?: "",
+                onQueryChange = { viewModel.searchCharacter(it) },
+                onClearQuery = { viewModel.clearSearch() },
+                isActive = viewModel.searchBarActive.value,
+                onActiveChange = { viewModel.searchBarActive.value = it }
+            )
             when (homeCharactersUiState.value) {
                 is HomeCharactersUiState.Error -> {
                     val errorMessage =
@@ -116,26 +129,29 @@ fun SharedTransitionScope.ScreenHome(
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun SearchBar(viewModel: ScreenHomeViewModel) {
-    var text by remember { mutableStateOf("") }
-    var active by remember { mutableStateOf(false) }
+fun SearchBar(
+    query: String,
+    onQueryChange: (String) -> Unit,
+    onClearQuery: () -> Unit,
+    isActive: Boolean,
+    onActiveChange: (Boolean) -> Unit
+) {
+    var text by remember { mutableStateOf(query) }
     val items = remember { mutableStateListOf<String>() }
+
     SearchBar(
         query = text,
         onQueryChange = {
             text = it
+            if (it.isNotEmpty()) onQueryChange(it)
         },
         onSearch = {
-            if (text.isNotEmpty()) {
-                // Geçerli arama sorgusunu ekle ve ViewModel'de aramayı tetikle
-                items.add(text)
-                viewModel.searchCharacter(text) // ViewModel fonksiyonunu çağır
-                active = false
-            }
+            if (text.isNotEmpty()) onQueryChange(text)
+            onActiveChange(false) // Arama yapıldığında SearchBar kapanır
         },
-        active = active,
+        active = isActive,
         onActiveChange = {
-            active = it
+            onActiveChange(it) // SearchBar'ın aktifliği kontrol ediliyor
         },
         placeholder = {
             Text(text = "Search Character")
@@ -146,21 +162,18 @@ fun SearchBar(viewModel: ScreenHomeViewModel) {
                     text = ""
                 },
                 imageVector = Icons.Rounded.Search,
-                contentDescription = ""
+                contentDescription = "Search Icon"
             )
         },
         trailingIcon = {
-            if (active) {
+            if (text.isNotEmpty()) { // Eğer arama metni boş değilse göster
                 Icon(
                     modifier = Modifier.clickable {
-                        if(text.isNotEmpty()) {
-                            text = ""
-                        } else {
-                            active = false
-                        }
+                        text = ""
+                        onClearQuery()
                     },
                     imageVector = Icons.Rounded.Close,
-                    contentDescription = ""
+                    contentDescription = "Clear Icon"
                 )
             }
         },

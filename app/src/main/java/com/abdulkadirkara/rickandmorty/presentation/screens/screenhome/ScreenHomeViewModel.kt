@@ -1,6 +1,7 @@
 package com.abdulkadirkara.rickandmorty.presentation.screens.screenhome
 
 import android.util.Log
+import androidx.compose.runtime.mutableStateOf
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
@@ -31,6 +32,9 @@ class ScreenHomeViewModel @Inject constructor(
     val homeCharactersUiState: LiveData<HomeCharactersUiState> = _homeCharactersUiState
     var allCharacters : List<CharacterListItem>? = null
 
+    var currentQuery: String? = null // Arama sorgusunu tutar
+    var searchBarActive = mutableStateOf(false) // SearchBar'ın açık/kapalı durumunu kontrol eder
+
     private val _homeLocationUiState = MutableLiveData<HomeLocationUiState>()
     val homeLocationUiState: LiveData<HomeLocationUiState> = _homeLocationUiState
 
@@ -39,8 +43,14 @@ class ScreenHomeViewModel @Inject constructor(
         getAllCharacters()
     }
 
+    fun clearSearch() {
+        currentQuery = null
+        getAllCharacters()
+    }
+
     fun searchCharacter(name: String) {
         viewModelScope.launch {
+            currentQuery = name
             Log.e(TAG, "searchCharacter was called")
             getSearchCharahctersUseCase.invoke(name).collect {
                 when(it){
