@@ -56,4 +56,24 @@ class RickAndMortyRepositoryImpl @Inject constructor(
             return NetworkResponse.Error(e)
         }
     }
+
+    override suspend fun getMultipleCharacters(ids: List<Int>): NetworkResponse<List<CharacterResponse>> {
+        Log.e(TAG, "getMultipleCharacters was called")
+        try {
+            return remoteDataSource.getMultipleCharacters(ids)
+        } catch (e: Exception) {
+            Log.e(TAG, e.toString())
+            return NetworkResponse.Error(e)
+        }
+    }
+
+    override suspend fun searchCharacter(name: String): NetworkResponse<CharactersResponse> {
+        Log.e(TAG, "searchCharacter was called")
+        try {
+            return remoteDataSource.searchCharacter(name)
+        } catch (e: Exception) {
+            Log.e(TAG, e.toString())
+            return NetworkResponse.Error(e)
+        }
+    }
 }

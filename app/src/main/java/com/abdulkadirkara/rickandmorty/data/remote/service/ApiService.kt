@@ -7,6 +7,7 @@ import com.abdulkadirkara.rickandmorty.data.remote.dto.Result
 import com.abdulkadirkara.rickandmorty.util.Constans
 import retrofit2.http.GET
 import retrofit2.http.Path
+import retrofit2.http.Query
 
 interface ApiService {
     @GET(Constans.ALL_CHARACTERS_END_POINT)
@@ -20,5 +21,11 @@ interface ApiService {
 
     @GET(Constans.SINGLE_LOCATION_END_POINT)
     suspend fun getSingleLocation(@Path("id") id: Int): Result
+
+    @GET(Constans.MULTIPLE_CHARACTER_END_POINT)
+    suspend fun getMultipleCharacters(@Path("ids") ids: List<Int>): List<CharacterResponse>
+
+    @GET(Constans.SEARCH_CHARACTER_END_POINT)
+    suspend fun searchCharacter(@Query("name") name: String): CharactersResponse
 
 }

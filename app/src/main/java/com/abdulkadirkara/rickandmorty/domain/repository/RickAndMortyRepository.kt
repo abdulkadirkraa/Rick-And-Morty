@@ -11,4 +11,6 @@ interface RickAndMortyRepository {
     suspend fun getSingleCharacter(id: Int): NetworkResponse<CharacterResponse>
     suspend fun getAllLocations(): NetworkResponse<LocationResponse>
     suspend fun getSingleLocation(id: Int) : NetworkResponse<Result>
+    suspend fun getMultipleCharacters(ids: List<Int>): NetworkResponse<List<CharacterResponse>>
+    suspend fun searchCharacter(name: String): NetworkResponse<CharactersResponse>
 }

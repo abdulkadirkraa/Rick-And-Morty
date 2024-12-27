@@ -87,4 +87,38 @@ class RemoteDataSourceImpl @Inject constructor(
             NetworkResponse.Error(Exception("Unkonwn Exception: ${e.localizedMessage}"))
         }
     }
+
+    override suspend fun getMultipleCharacters(ids: List<Int>): NetworkResponse<List<CharacterResponse>> = withContext(ioDispatcher){
+        try {
+            val response = apiService.getMultipleCharacters(ids)
+            Log.e(TAG, "getMultipleCharacters is success")
+            NetworkResponse.Success(response)
+        }  catch (e: HttpException) {
+            Log.e(TAG, "getAllLocations HttpException: ${e.localizedMessage}")
+            NetworkResponse.Error(Exception("API Error: ${e.code()} - ${e.message()}"))
+        } catch (e: IOException) {
+            Log.e(TAG, "getAllLocations IOException: ${e.localizedMessage}")
+            NetworkResponse.Error(Exception("Network Error: ${e.localizedMessage}"))
+        } catch (e: Exception) {
+            Log.e(TAG, "getAllLocations Exception: ${e.localizedMessage}")
+            NetworkResponse.Error(Exception("Unkonwn Exception: ${e.localizedMessage}"))
+        }
+    }
+
+    override suspend fun searchCharacter(name: String): NetworkResponse<CharactersResponse> = withContext(ioDispatcher) {
+        try {
+            val response = apiService.searchCharacter(name)
+            Log.e(TAG, "searchCharacter is success")
+            NetworkResponse.Success(response)
+        } catch (e: HttpException) {
+            Log.e(TAG, "getAllLocations HttpException: ${e.localizedMessage}")
+            NetworkResponse.Error(Exception("API Error: ${e.code()} - ${e.message()}"))
+        } catch (e: IOException) {
+            Log.e(TAG, "getAllLocations IOException: ${e.localizedMessage}")
+            NetworkResponse.Error(Exception("Network Error: ${e.localizedMessage}"))
+        } catch (e: Exception) {
+            Log.e(TAG, "getAllLocations Exception: ${e.localizedMessage}")
+            NetworkResponse.Error(Exception("Unkonwn Exception: ${e.localizedMessage}"))
+        }
+    }
 }

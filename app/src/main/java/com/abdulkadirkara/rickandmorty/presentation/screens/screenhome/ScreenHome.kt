@@ -35,7 +35,6 @@ import androidx.compose.material3.Icon
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.livedata.observeAsState
 import androidx.compose.runtime.mutableStateListOf
@@ -68,12 +67,6 @@ fun SharedTransitionScope.ScreenHome(
 ) {
     val homeCharactersUiState = viewModel.homeCharactersUiState.observeAsState()
     val homeLocationUiState = viewModel.homeLocationUiState.observeAsState()
-
-    LaunchedEffect(Unit) {
-        viewModel.getAllCharacters()
-        viewModel.getAllLocations()
-    }
-
     Scaffold(
         topBar = {
             CenterAlignedTopAppBar(
@@ -84,7 +77,8 @@ fun SharedTransitionScope.ScreenHome(
         Column(
             modifier = Modifier
                 .fillMaxSize()
-                .padding(top = paddingValues.calculateTopPadding(), start = 12.dp, end = 12.dp)
+                .padding(top = paddingValues.calculateTopPadding(), bottom = paddingValues.calculateBottomPadding(),
+                    start = 12.dp, end = 12.dp)
         ) {
             when (homeLocationUiState.value) {
                 is HomeLocationUiState.Error -> {
@@ -100,7 +94,7 @@ fun SharedTransitionScope.ScreenHome(
                 }
                 else -> {}
             }
-            SearchBar()
+            SearchBar(viewModel)
             when (homeCharactersUiState.value) {
                 is HomeCharactersUiState.Error -> {
                     val errorMessage =
@@ -122,7 +116,7 @@ fun SharedTransitionScope.ScreenHome(
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun SearchBar() {
+fun SearchBar(viewModel: ScreenHomeViewModel) {
     var text by remember { mutableStateOf("") }
     var active by remember { mutableStateOf(false) }
     val items = remember { mutableStateListOf<String>() }
@@ -132,8 +126,12 @@ fun SearchBar() {
             text = it
         },
         onSearch = {
-            items.add(text)
-            active = false
+            if (text.isNotEmpty()) {
+                // Geçerli arama sorgusunu ekle ve ViewModel'de aramayı tetikle
+                items.add(text)
+                viewModel.searchCharacter(text) // ViewModel fonksiyonunu çağır
+                active = false
+            }
         },
         active = active,
         onActiveChange = {
@@ -353,6 +351,6 @@ fun LocationCard(location: LocationListItem, onClick: (LocationListItem) -> Unit
     }
 }
 
-fun getResidentIds(location: LocationListItem): List<String> {
-    return location.residents.map { it.split("/").last() }
+fun getResidentIds(location: LocationListItem): List<Int> {
+    return location.residents.map { it.split("/").last().toInt() }
 }
