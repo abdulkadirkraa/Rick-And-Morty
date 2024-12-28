@@ -178,7 +178,11 @@ fun DividerAndTitleComponent(title : String){
             .padding(12.dp),
         verticalAlignment = Alignment.CenterVertically,
     ) {
-        CustomHorizontalDivider()
+        HorizontalDivider(
+            thickness = 1.dp,
+            color = Color.Gray,
+            modifier = Modifier.weight(30f).fillMaxWidth()
+        )
         Text(
             text = title,
             fontSize = 16.sp,
@@ -187,17 +191,12 @@ fun DividerAndTitleComponent(title : String){
             textAlign = TextAlign.Center,
             modifier = Modifier.padding(horizontal = 4.dp).weight(30f).fillMaxWidth()
         )
-        CustomHorizontalDivider()
+        HorizontalDivider(
+            thickness = 1.dp,
+            color = Color.Gray,
+            modifier = Modifier.weight(30f).fillMaxWidth()
+        )
     }
-}
-
-@Composable
-fun CustomHorizontalDivider(thickness: Dp = 1.dp, color: Color = Color.Gray){
-    HorizontalDivider(
-        thickness = thickness,
-        color = color,
-        modifier = Modifier.fillMaxWidth()
-    )
 }
 
 @Composable
