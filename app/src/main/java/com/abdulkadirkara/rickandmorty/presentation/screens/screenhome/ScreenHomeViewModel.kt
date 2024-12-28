@@ -9,13 +9,17 @@ import com.abdulkadirkara.rickandmorty.data.remote.onEmpty
 import com.abdulkadirkara.rickandmorty.data.remote.onError
 import com.abdulkadirkara.rickandmorty.data.remote.onLoading
 import com.abdulkadirkara.rickandmorty.data.remote.onSuccess
+import com.abdulkadirkara.rickandmorty.di.coroutines.DispatcherType
+import com.abdulkadirkara.rickandmorty.di.coroutines.RickAndMortyDispatchers
 import com.abdulkadirkara.rickandmorty.domain.model.CharacterListItem
 import com.abdulkadirkara.rickandmorty.domain.usecase.GetAllCharactersUseCase
 import com.abdulkadirkara.rickandmorty.domain.usecase.GetAllLocationsUseCase
 import com.abdulkadirkara.rickandmorty.domain.usecase.GetSearchCharahctersUseCase
 import dagger.hilt.android.lifecycle.HiltViewModel
+import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
 import javax.inject.Inject
 
 @HiltViewModel
@@ -23,7 +27,9 @@ class ScreenHomeViewModel @Inject constructor(
     private val getAllCharactersUseCase: GetAllCharactersUseCase,
     private val getAllLocationsUseCase: GetAllLocationsUseCase,
     //private val getMultipleCharacterUseCase: GetMultipleCharacterUseCase,
-    private val getSearchCharahctersUseCase: GetSearchCharahctersUseCase
+    private val getSearchCharahctersUseCase: GetSearchCharahctersUseCase,
+    @RickAndMortyDispatchers(DispatcherType.Main) private val mainDispatcher: CoroutineDispatcher,
+    @RickAndMortyDispatchers(DispatcherType.Io) private val ioDispatcher: CoroutineDispatcher
 ) : ViewModel() {
 
     private val _homeCharactersUiState = MutableLiveData<HomeCharactersUiState>()
@@ -48,19 +54,27 @@ class ScreenHomeViewModel @Inject constructor(
     }
 
     fun searchCharacter(name: String) {
-        viewModelScope.launch {
+        viewModelScope.launch(ioDispatcher) {
             currentQuery = name
             delay(300)
             if (name == currentQuery){
                 getSearchCharahctersUseCase.invoke(name).collect { it->
                     it.onLoading {
-                        _homeCharactersUiState.value = HomeCharactersUiState.Loading
+                        withContext(mainDispatcher){
+                            _homeCharactersUiState.value = HomeCharactersUiState.Loading
+                        }
                     }.onEmpty {
-                        _homeCharactersUiState.value = HomeCharactersUiState.Empty
+                        withContext(mainDispatcher) {
+                            _homeCharactersUiState.value = HomeCharactersUiState.Empty
+                        }
                     }.onError {
-                        _homeCharactersUiState.value = HomeCharactersUiState.Error("Network Error")
+                        withContext(mainDispatcher) {
+                            _homeCharactersUiState.value = HomeCharactersUiState.Error("Network Error")
+                        }
                     }.onSuccess {
-                        _homeCharactersUiState.value = HomeCharactersUiState.Success(it)
+                        withContext(mainDispatcher) {
+                            _homeCharactersUiState.value = HomeCharactersUiState.Success(it)
+                        }
                     }
                 }
             }
@@ -96,7 +110,6 @@ class ScreenHomeViewModel @Inject constructor(
                 }.onSuccess {
                     _homeLocationUiState.value = HomeLocationUiState.Success(it)
                 }
-
             }
         }
     }

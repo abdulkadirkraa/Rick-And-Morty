@@ -66,8 +66,8 @@ fun SharedTransitionScope.ScreenHome(
     navController: NavController, viewModel: ScreenHomeViewModel,
     animatedVisibilityScope: AnimatedVisibilityScope
 ) {
-    val homeCharactersUiState = viewModel.homeCharactersUiState.observeAsState()
-    val homeLocationUiState = viewModel.homeLocationUiState.observeAsState()
+    val homeCharactersUiState = viewModel.homeCharactersUiState.observeAsState(HomeCharactersUiState.Loading)
+    val homeLocationUiState = viewModel.homeLocationUiState.observeAsState(HomeLocationUiState.Loading)
     val currentQuery = viewModel.currentQuery // ViewModel'deki mevcut sorgu
 
     LaunchedEffect(Unit) {
@@ -99,7 +99,9 @@ fun SharedTransitionScope.ScreenHome(
                     val data = (homeLocationUiState.value as HomeLocationUiState.Success).data
                     LocationsComponent(data)
                 }
-                else -> {}
+                is HomeLocationUiState.Empty -> {
+                    ErrorComponent("No results found")
+                }
             }
             SearchBar(
                 query = currentQuery ?: "",
@@ -125,7 +127,6 @@ fun SharedTransitionScope.ScreenHome(
                 is HomeCharactersUiState.Empty -> {
                     ErrorComponent("No results found")
                 }
-                else -> {}
             }
         }
     }

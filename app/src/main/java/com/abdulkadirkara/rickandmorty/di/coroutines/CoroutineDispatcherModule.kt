@@ -31,6 +31,4 @@ object CoroutineDispatcherModule {
     @Provides
     @Singleton
     fun provideUnconfinedDispatcher(): CoroutineDispatcher = Dispatchers.Unconfined
-
-
 }
